@@ -44,9 +44,13 @@ const DEDUP_DIR = '/data/dedup';
 try { if (!fs.existsSync(DEDUP_DIR)) fs.mkdirSync(DEDUP_DIR, { recursive: true }); } catch(e) {}
 
 function isDuplicate(msg) {
+  // Usar msg.id.id (hash puro) como clave primaria — _serialized incluye el "from"
+  // (@lid vs @c.us) y por eso difiere entre los dos eventos del mismo mensaje.
+  // El hash msg.id.id sí es idéntico en ambos.
+  const msgId = (msg.id && (msg.id.id || msg.id._serialized)) || null;
   const from = (msg.from || '').replace(/[^a-z0-9]/gi, '').slice(0, 20);
   const ts = msg.timestamp || Math.floor(Date.now() / 1000);
-  const key = `${from}_${ts}`;
+  const key = msgId ? `id_${msgId}` : `${from}_${ts}`;
   const lockFile = path.join(DEDUP_DIR, key);
 
   // In-memory check (fast path, same process)
@@ -150,8 +154,23 @@ async function handleMessage(msg) {
 
     console.log(`📨 Mensaje recibido de ${msg.from}: "${msg.body?.slice(0, 80)}"`);
 
+    // Normalizar identidad: los eventos @lid usan un id de privacidad distinto al
+    // número real → la memoria del cliente quedaría partida en dos. Resolver a @c.us.
+    let fromId = msg.from;
+    if (fromId.endsWith('@lid')) {
+      try {
+        const contact = await msg.getContact();
+        if (contact && contact.number) {
+          fromId = contact.number + '@c.us';
+          console.log(`🔁 @lid resuelto a ${fromId}`);
+        }
+      } catch (e) {
+        console.warn('⚠️ No se pudo resolver @lid:', e.message);
+      }
+    }
+
     const payload = {
-      from: msg.from,
+      from: fromId,
       body: msg.body,
       timestamp: msg.timestamp,
       type: msg.type,
@@ -232,6 +251,23 @@ app.get('/qr', async (req, res) => {
       </body>
     </html>
   `);
+});
+
+// Endpoint de dedup atómico para n8n
+// Node.js es single-threaded → solo 1 request se procesa a la vez → atómico por diseño
+// n8n llama esto ANTES de procesar. Si retorna {duplicate:true}, la ejecución se detiene.
+app.post('/dedup', (req, res) => {
+  const { key } = req.body || {};
+  if (!key) return res.status(400).json({ duplicate: false, error: 'missing key' });
+  const dedupKey = 'n8n_' + key;
+  if (recentMessages.has(dedupKey)) {
+    console.log('🔁 n8n dedup BLOQUEADO:', key);
+    return res.json({ duplicate: true });
+  }
+  recentMessages.set(dedupKey, true);
+  setTimeout(() => recentMessages.delete(dedupKey), 60000);
+  console.log('✅ n8n dedup PERMITIDO:', key);
+  res.json({ duplicate: false });
 });
 
 // n8n llama aquí para enviar un mensaje al cliente

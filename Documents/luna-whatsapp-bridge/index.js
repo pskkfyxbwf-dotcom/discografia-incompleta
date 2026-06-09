@@ -15,9 +15,19 @@
 
 const express = require('express');
 const qrcode = require('qrcode');
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
+
+// Evitar que errores no capturados maten el proceso
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('⚠️ unhandledRejection:', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('⚠️ uncaughtException:', err);
+});
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
@@ -26,6 +36,41 @@ const BRIDGE_SECRET = process.env.BRIDGE_SECRET || 'change-me';
 
 let lastQr = null;
 let isReady = false;
+
+// Deduplicador: usa filesystem + memory para funcionar con múltiples instancias Railway
+// El volumen /data es compartido entre instancias, así que el lock file es global
+const recentMessages = new Map();
+const DEDUP_DIR = '/data/dedup';
+try { if (!fs.existsSync(DEDUP_DIR)) fs.mkdirSync(DEDUP_DIR, { recursive: true }); } catch(e) {}
+
+function isDuplicate(msg) {
+  const from = (msg.from || '').replace(/[^a-z0-9]/gi, '').slice(0, 20);
+  const ts = msg.timestamp || Math.floor(Date.now() / 1000);
+  const key = `${from}_${ts}`;
+  const lockFile = path.join(DEDUP_DIR, key);
+
+  // In-memory check (fast path, same process)
+  if (recentMessages.has(key)) {
+    console.log('🔁 Duplicado ignorado (mem):', key);
+    return true;
+  }
+
+  // Filesystem check (cross-instance)
+  try {
+    if (fs.existsSync(lockFile)) {
+      console.log('🔁 Duplicado ignorado (file):', key);
+      return true;
+    }
+    fs.writeFileSync(lockFile, Date.now().toString());
+    setTimeout(() => { try { fs.unlinkSync(lockFile); } catch(e) {} }, 30000);
+  } catch(e) {
+    console.warn('⚠️ Dedup filesystem error:', e.message);
+  }
+
+  recentMessages.set(key, true);
+  setTimeout(() => recentMessages.delete(key), 30000);
+  return false;
+}
 
 // --- Cliente de WhatsApp ---
 const client = new Client({
@@ -61,6 +106,37 @@ client.on('ready', () => {
 client.on('disconnected', (reason) => {
   isReady = false;
   console.log('⚠️ WhatsApp desconectado:', reason);
+  // Si la sesión expiró, limpiar y reinicializar después de 5s
+  if (reason === 'LOGOUT' || reason === 'NAVIGATION') {
+    console.log('🔄 Limpiando sesión y reinicializando...');
+    setTimeout(() => {
+      try {
+        const authPath = '/data/wwebjs_auth';
+        if (fs.existsSync(authPath)) {
+          fs.rmSync(authPath, { recursive: true, force: true });
+          console.log('🗑️ Sesión eliminada');
+        }
+      } catch(e) { console.error('Error limpiando sesión:', e); }
+      client.initialize().catch(err => console.error('Error reinicializando:', err));
+    }, 5000);
+  }
+});
+
+client.on('auth_failure', (msg) => {
+  console.error('❌ Auth failure:', msg);
+  isReady = false;
+  lastQr = null;
+  // Limpiar sesión corrupta y reinicializar
+  setTimeout(() => {
+    try {
+      const authPath = '/data/wwebjs_auth';
+      if (fs.existsSync(authPath)) {
+        fs.rmSync(authPath, { recursive: true, force: true });
+        console.log('🗑️ Sesión corrupta eliminada, generando nuevo QR...');
+      }
+    } catch(e) { console.error('Error limpiando sesión:', e); }
+    client.initialize().catch(err => console.error('Error reinicializando:', err));
+  }, 3000);
 });
 
 // Manejador central de mensajes
@@ -70,6 +146,7 @@ async function handleMessage(msg) {
     if (msg.from === 'status@broadcast') return;
     if (msg.fromMe) return;
     if (msg.from.endsWith('@g.us')) return;
+    if (isDuplicate(msg)) return;
 
     console.log(`📨 Mensaje recibido de ${msg.from}: "${msg.body?.slice(0, 80)}"`);
 
@@ -107,13 +184,28 @@ async function handleMessage(msg) {
   }
 }
 
-// Capturar mensajes entrantes (ambos eventos por compatibilidad)
+// Capturar mensajes entrantes
 client.on('message', handleMessage);
-client.on('message_create', (msg) => {
-  if (!msg.fromMe) handleMessage(msg);
-});
 
-client.initialize();
+// Inicializar con manejo de errores — si falla por sesión corrupta, limpiar y reintentar
+function initClient() {
+  client.initialize().catch(err => {
+    console.error('❌ Error en initialize(), limpiando sesión y reintentando en 10s:', err.message);
+    isReady = false;
+    lastQr = null;
+    setTimeout(() => {
+      try {
+        const authPath = '/data/wwebjs_auth';
+        if (fs.existsSync(authPath)) {
+          fs.rmSync(authPath, { recursive: true, force: true });
+          console.log('🗑️ Sesión eliminada, reintentando...');
+        }
+      } catch(e) { console.error('Error limpiando:', e); }
+      initClient();
+    }, 10000);
+  });
+}
+initClient();
 
 // --- Endpoints HTTP ---
 
@@ -186,7 +278,6 @@ app.post('/send-document', async (req, res) => {
   }
 
   try {
-    const { MessageMedia } = require('whatsapp-web.js');
     const chatId = to.includes('@') ? to : `${to}@c.us`;
     const media = new MessageMedia(
       mimetype || 'application/pdf',

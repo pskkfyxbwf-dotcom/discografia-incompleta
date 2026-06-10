@@ -293,10 +293,47 @@ app.post('/dedup', (req, res) => {
   res.json({ duplicate: false });
 });
 
+// Envío de texto usando la API interna de WhatsApp Web (window.Store) en vez
+// del wrapper de whatsapp-web.js. El wrapper (WWebJS.sendMessage / Client.sendMessage)
+// pasa por findOrCreateLatestChat, que es donde falla "No LID for user" y donde
+// los envíos a cuentas @lid se "resuelven" sin error pero no se entregan
+// (bugs abiertos #3834 / #2654 de whatsapp-web.js). Store.SendTextMsgToChat
+// envía directo sobre el chat ya existente, sin pasar por esa función.
+async function sendTextViaStore(chatId, text) {
+  return client.pupPage.evaluate(async ({ cid, txt }) => {
+    const chat = window.Store.Chat.get(cid);
+    if (!chat) return { ok: false, error: 'chat-not-found-in-store' };
+    if (typeof window.Store.SendTextMsgToChat !== 'function') {
+      return { ok: false, error: 'SendTextMsgToChat-no-disponible' };
+    }
+    await window.Store.SendTextMsgToChat(chat, txt);
+    return { ok: true };
+  }, { cid: chatId, txt: text });
+}
+
 // Envía un mensaje/medio probando primero el chatId dado y, si whatsapp-web.js
 // falla con "No LID for user" (bug conocido en cuentas con identidad @lid),
 // reintenta usando el id @lid original que vimos en el mensaje entrante.
 async function sendWithLidFallback(chatId, content, options) {
+  // Prioridad 0: para mensajes de texto, usar la API interna de Store sobre
+  // el chat (probando primero el id que llegó y, si hay, su variante @lid).
+  if (typeof content === 'string') {
+    const candidates = [chatId];
+    if (lidMap.has(chatId)) candidates.push(lidMap.get(chatId));
+    for (const cid of candidates) {
+      try {
+        const result = await sendTextViaStore(cid, content);
+        if (result && result.ok) {
+          console.log(`✅ Enviado vía Store.SendTextMsgToChat (${cid})`);
+          return result;
+        }
+        console.warn(`⚠️ Store.SendTextMsgToChat no entregó para ${cid}:`, result && result.error);
+      } catch (err) {
+        console.warn(`⚠️ Error en Store.SendTextMsgToChat para ${cid}:`, err.message);
+      }
+    }
+  }
+
   // Prioridad 1: el chat vivo capturado al recibir el último mensaje de este
   // contacto. Es la forma más confiable de responder en cuentas @lid.
   if (chatStore.has(chatId)) {

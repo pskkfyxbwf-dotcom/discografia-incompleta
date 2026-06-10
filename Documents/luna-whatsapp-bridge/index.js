@@ -287,8 +287,14 @@ async function sendWithLidFallback(chatId, content, options) {
   } catch (err) {
     if (String(err).includes('No LID for user') && lidMap.has(chatId)) {
       const lidId = lidMap.get(chatId);
-      console.log(`🔁 Reintentando envío con id @lid: ${lidId}`);
-      return await client.sendMessage(lidId, content, options);
+      console.log(`🔁 Reintentando envío vía chat @lid: ${lidId}`);
+      try {
+        const chat = await client.getChatById(lidId);
+        return await chat.sendMessage(content, options);
+      } catch (err2) {
+        console.warn('⚠️ Falló envío vía chat @lid, probando sendMessage directo:', err2.message);
+        return await client.sendMessage(lidId, content, options);
+      }
     }
     throw err;
   }

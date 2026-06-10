@@ -37,6 +37,12 @@ const BRIDGE_SECRET = process.env.BRIDGE_SECRET || 'change-me';
 let lastQr = null;
 let isReady = false;
 
+// Mapa c.us -> lid: whatsapp-web.js 1.26 falla con "No LID for user" al enviar
+// a un @c.us cuando la cuenta del contacto usa identidad @lid. Guardamos el id
+// @lid original visto en cada mensaje entrante para poder reintentar el envío
+// con ese id si el envío al @c.us falla.
+const lidMap = new Map();
+
 // Deduplicador: usa filesystem + memory para funcionar con múltiples instancias Railway
 // El volumen /data es compartido entre instancias, así que el lock file es global
 const recentMessages = new Map();
@@ -161,7 +167,9 @@ async function handleMessage(msg) {
       try {
         const contact = await msg.getContact();
         if (contact && contact.number) {
-          fromId = contact.number + '@c.us';
+          const cUsId = contact.number + '@c.us';
+          lidMap.set(cUsId, msg.from);
+          fromId = cUsId;
           console.log(`🔁 @lid resuelto a ${fromId}`);
         }
       } catch (e) {
@@ -270,6 +278,22 @@ app.post('/dedup', (req, res) => {
   res.json({ duplicate: false });
 });
 
+// Envía un mensaje/medio probando primero el chatId dado y, si whatsapp-web.js
+// falla con "No LID for user" (bug conocido en cuentas con identidad @lid),
+// reintenta usando el id @lid original que vimos en el mensaje entrante.
+async function sendWithLidFallback(chatId, content, options) {
+  try {
+    return await client.sendMessage(chatId, content, options);
+  } catch (err) {
+    if (String(err).includes('No LID for user') && lidMap.has(chatId)) {
+      const lidId = lidMap.get(chatId);
+      console.log(`🔁 Reintentando envío con id @lid: ${lidId}`);
+      return await client.sendMessage(lidId, content, options);
+    }
+    throw err;
+  }
+}
+
 // n8n llama aquí para enviar un mensaje al cliente
 app.post('/send', async (req, res) => {
   const secret = req.headers['x-bridge-secret'];
@@ -289,7 +313,7 @@ app.post('/send', async (req, res) => {
   try {
     // Acepta tanto "573001234567" como "573001234567@c.us"
     const chatId = to.includes('@') ? to : `${to}@c.us`;
-    await client.sendMessage(chatId, message);
+    await sendWithLidFallback(chatId, message);
     res.json({ ok: true });
   } catch (err) {
     console.error('❌ Error enviando mensaje:', err);
@@ -320,7 +344,7 @@ app.post('/send-document', async (req, res) => {
       base64,
       filename
     );
-    await client.sendMessage(chatId, media, { caption: caption || '' });
+    await sendWithLidFallback(chatId, media, { caption: caption || '' });
     res.json({ ok: true });
   } catch (err) {
     console.error('❌ Error enviando documento:', err);

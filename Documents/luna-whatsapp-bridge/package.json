@@ -1,0 +1,15 @@
+{
+  "name": "luna-whatsapp-bridge",
+  "version": "1.0.0",
+  "description": "Puente entre WhatsApp (whatsapp-web.js) y el workflow de n8n de Luna - Luz de Luna Eventos",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "whatsapp-web.js": "^1.34.0",
+    "qrcode-terminal": "^0.12.0",
+    "qrcode": "^1.5.4"
+  }
+}

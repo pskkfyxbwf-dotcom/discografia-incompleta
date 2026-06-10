@@ -43,6 +43,12 @@ let isReady = false;
 // con ese id si el envío al @c.us falla.
 const lidMap = new Map();
 
+// Mapa fromId (c.us o lid) -> objeto Chat vivo de whatsapp-web.js, capturado al
+// recibir el mensaje. Enviar la respuesta a través de ESTE chat (en vez de
+// reconstruir el id y llamar a getChatById/sendMessage de nuevo) evita el bug
+// "No LID for user" / envíos silenciosos que no llegan en cuentas con @lid.
+const chatStore = new Map();
+
 // Deduplicador: usa filesystem + memory para funcionar con múltiples instancias Railway
 // El volumen /data es compartido entre instancias, así que el lock file es global
 const recentMessages = new Map();
@@ -177,6 +183,15 @@ async function handleMessage(msg) {
       }
     }
 
+    // Guardar el chat vivo de este mensaje para poder responder por el mismo
+    // canal exacto (ver chatStore arriba).
+    try {
+      const chat = await msg.getChat();
+      chatStore.set(fromId, chat);
+    } catch (e) {
+      console.warn('⚠️ No se pudo obtener el chat:', e.message);
+    }
+
     const payload = {
       from: fromId,
       body: msg.body,
@@ -282,6 +297,16 @@ app.post('/dedup', (req, res) => {
 // falla con "No LID for user" (bug conocido en cuentas con identidad @lid),
 // reintenta usando el id @lid original que vimos en el mensaje entrante.
 async function sendWithLidFallback(chatId, content, options) {
+  // Prioridad 1: el chat vivo capturado al recibir el último mensaje de este
+  // contacto. Es la forma más confiable de responder en cuentas @lid.
+  if (chatStore.has(chatId)) {
+    try {
+      return await chatStore.get(chatId).sendMessage(content, options);
+    } catch (err) {
+      console.warn('⚠️ Falló envío vía chat guardado, probando alternativas:', err.message);
+    }
+  }
+
   try {
     return await client.sendMessage(chatId, content, options);
   } catch (err) {

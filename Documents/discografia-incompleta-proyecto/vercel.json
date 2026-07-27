@@ -1,6 +1,15 @@
 {
   "version": 2,
-  "public": true,
-  "buildCommand": "echo 'Static files only'",
-  "outputDirectory": "build"
+  "builds": [
+    {
+      "src": "build/index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "build/index.html"
+    }
+  ]
 }

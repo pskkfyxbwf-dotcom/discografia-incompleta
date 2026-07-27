@@ -1,0 +1,956 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Discografía incompleta</title>
+<style>
+/*__FONTS__*/
+
+:root{
+  --acc:#FF3B6B;        /* tracks 1–3: coral eléctrico vívido */
+  --acc-dim:#7A1533;
+  --acc-glow:rgba(255,59,107,.9);
+  --paper:#F3EFEA;
+  --paper-dim:#A79AA6;
+
+  --chassis-1:#48474E;
+  --chassis-2:#221F25;
+  --chassis-hi:#7A7880;
+  --chassis-lo:#121116;
+  --metal:#B7B3BE;
+  --screen-bg:#0A0A0F;
+
+  --paper-r:#EAFBF6;
+  --paper-dim-r:#78B3A7;
+  --screen-bg-r:#07110F;
+
+  --font-display:'Big Shoulders Stencil','Arial Narrow',sans-serif;
+  --font-title:'DotGothic16','Space Mono',monospace;
+  --font-mono:'Space Mono','Courier New',monospace;
+
+  /*__PHOTOS__*/
+  /* Background images URLs - placeholder for actual images */
+  --img-bg-guitar:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 280"%3E%3Crect fill="%23c9c2b6" width="180" height="280" opacity="0.3"/%3E%3C/svg%3E');
+  --img-bg-turntable:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 250"%3E%3Ccircle cx="125" cy="125" r="120" fill="%23c9c2b6" opacity="0.3"/%3E%3C/svg%3E');
+  --img-bg-mic:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 200"%3E%3Crect fill="%23c9c2b6" width="120" height="200" opacity="0.3"/%3E%3C/svg%3E');
+  --img-bg-keyboard:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120"%3E%3Crect fill="%23c9c2b6" width="200" height="120" opacity="0.3"/%3E%3C/svg%3E');
+  --img-bg-vinyl:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150"%3E%3Ccircle cx="75" cy="75" r="70" fill="%23c9c2b6" opacity="0.3"/%3E%3C/svg%3E');
+  --img-bg-cables:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 180"%3E%3Crect fill="%23c9c2b6" width="100" height="180" opacity="0.3"/%3E%3C/svg%3E');
+}
+body[data-accent="alarm"]{ --acc:#FF3D1F; --acc-dim:#7A1B0C; --acc-glow:rgba(255,61,31,.95); }
+body[data-accent="void"]{  --acc:#B9C6CE; --acc-dim:#46505A; --acc-glow:rgba(185,198,206,.55); }
+body[data-accent="teal"]{  --acc:#22E6D0; --acc-dim:#0D5C52; --acc-glow:rgba(34,230,208,.9); }
+
+*,*::before,*::after{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;overflow:hidden;
+  background:#050409;
+  color:var(--paper);
+  font-family:var(--font-mono);
+  -webkit-font-smoothing:antialiased;
+  display:flex;align-items:center;justify-content:center;
+  min-height:100dvh;
+}
+::selection{background:var(--acc);color:#100D09;}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer;padding:0;}
+
+/* ================= FONDO: ShapeBlur (three.js) + cuarto con props ================= */
+#shapeblur-canvas{
+  position:fixed;inset:0;z-index:0;
+  width:100%;height:100%;
+  pointer-events:none;
+  filter:blur(28px) saturate(1.55);
+  transition:filter 900ms ease;
+}
+.room{position:fixed;inset:0;z-index:2;overflow:hidden;pointer-events:none;}
+.room::before{
+  content:"";position:absolute;inset:-10%;
+  background:radial-gradient(ellipse 58% 46% at 50% 55%, var(--acc-glow) 0%, transparent 68%);
+  opacity:.16;filter:blur(60px);
+  transition:background 900ms ease;
+}
+.room-floor{
+  position:absolute;left:0;right:0;bottom:0;height:32%;
+  background:linear-gradient(0deg, #05040300 0%, #0a0705aa 100%);
+}
+.prop-parallax{position:absolute;will-change:transform;transition:transform 140ms linear;}
+.prop{position:absolute;inset:0;background-repeat:no-repeat;background-position:center;background-size:contain;pointer-events:none;}
+.pw-guitar{width:min(36vw,240px);height:min(80vh,700px);right:5%;top:4%;}
+.prop-guitar{
+  background-image:var(--img-guitar);
+  transform-origin:top center;
+  filter:blur(3.2px) drop-shadow(0 30px 40px rgba(0,0,0,.65));
+  animation:guitarSway 7s ease-in-out infinite;
+  opacity:.9;
+}
+@keyframes guitarSway{0%,100%{transform:rotate(-2deg) scale(1.08);}50%{transform:rotate(-1.1deg) scale(1.08);}}
+.pw-turntable{width:min(31vw,290px);height:min(24vh,220px);left:4%;bottom:5%;}
+.prop-turntable{
+  background-image:var(--img-turntable);
+  filter:blur(2.8px) drop-shadow(0 16px 22px rgba(0,0,0,.55));
+  -webkit-mask-image:radial-gradient(ellipse 72% 72% at 50% 50%, black 70%, transparent 97%);
+  mask-image:radial-gradient(ellipse 72% 72% at 50% 50%, black 70%, transparent 97%);
+  transform:scale(1.1);
+  opacity:.92;
+}
+.pw-vinyl{width:min(27vw,235px);height:min(19vh,165px);left:5%;top:6%;}
+.prop-vinyl{
+  background-image:var(--img-vinyl);
+  filter:blur(3.2px) drop-shadow(0 14px 18px rgba(0,0,0,.5));
+  -webkit-mask-image:radial-gradient(ellipse 70% 70% at 50% 50%, black 65%, transparent 97%);
+  mask-image:radial-gradient(ellipse 70% 70% at 50% 50%, black 65%, transparent 97%);
+  transform:scale(1.08);
+  opacity:.85;
+}
+.pw-headphones{width:min(29vw,255px);height:min(21vh,190px);right:4%;bottom:6%;}
+.prop-headphones{
+  background-image:var(--img-headphones);
+  filter:blur(3.2px) drop-shadow(0 16px 20px rgba(0,0,0,.55));
+  -webkit-mask-image:radial-gradient(ellipse 72% 72% at 50% 50%, black 68%, transparent 97%);
+  mask-image:radial-gradient(ellipse 72% 72% at 50% 50%, black 68%, transparent 97%);
+  animation:hpSway 8s ease-in-out infinite;
+  opacity:.9;
+}
+@keyframes hpSway{0%,100%{transform:rotate(1.5deg) scale(1.08);}50%{transform:rotate(0.6deg) scale(1.08);}}
+/* ================= BACKGROUND IMAGES (7 elementos con parallax) ================= */
+#background-images{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;filter:blur(1px);}
+.bg-image{position:absolute;background-repeat:no-repeat;background-position:center;background-size:contain;pointer-events:none;will-change:transform;transition:transform 140ms linear;}
+.bg-guitar{width:180px;height:280px;top:5%;left:2%;opacity:0.18;transform:rotate(-15deg);}
+.bg-turntable{width:250px;height:250px;top:25%;left:50%;opacity:0.12;transform:translateX(-50%);}
+.bg-mic{width:120px;height:200px;top:8%;right:3%;opacity:0.15;transform:rotate(25deg);}
+.bg-keyboard{width:200px;height:120px;bottom:5%;left:1%;opacity:0.14;}
+.bg-vinyl{width:150px;height:150px;bottom:3%;right:2%;opacity:0.16;}
+.bg-cables{width:100px;height:180px;top:40%;right:5%;opacity:0.10;}
+.bg-lights{position:absolute;top:0;left:0;width:100%;height:200px;background:linear-gradient(180deg, rgba(180,50,100,0.15) 0%, rgba(100,50,150,0.08) 50%, transparent 100%);opacity:0.08;}
+@media(max-width:760px){
+  .prop-parallax{display:none;}
+  #background-images{display:none;}
+}
+.bg-vignette{
+  position:fixed;inset:0;z-index:3;pointer-events:none;
+  background:radial-gradient(ellipse 72% 62% at 50% 46%, transparent 0%, rgba(5,4,9,.5) 68%, rgba(5,4,9,.88) 100%);
+}
+.grain{
+  position:fixed;inset:0;pointer-events:none;z-index:200;opacity:.035;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grainShift 8s steps(8) infinite;
+}
+@keyframes grainShift{0%{transform:translate(0,0);}100%{transform:translate(-4%,3%);}}
+
+/* ================= DEVICE STAGE (parallax / drag-rotate 3D) ================= */
+.device-stage{
+  position:relative;z-index:5;
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  perspective:1400px;
+}
+
+/* Contenedor para bordes del device */
+.device-border-frame{
+  position:absolute;inset:0;pointer-events:none;z-index:4;
+  width:min(84vw,398px);height:min(86dvh,760px);
+  left:50%;top:50%;transform:translate(-50%, -50%);
+  border-radius:26px;
+  /* Borde left (lateral izquierdo) */
+  box-shadow:
+    -10px 0 0 -8px #0a0a0a,
+    -10px 0 20px -6px rgba(0,0,0,.8),
+    10px 0 0 -8px #3a3a3a,
+    10px 0 20px -6px rgba(0,0,0,.6);
+}
+.device{
+  --tiltX:0deg; --tiltY:0deg; --sheen-angle:120deg;
+  position:relative;
+  width:min(84vw,398px);
+  height:min(86dvh,760px);
+  display:flex;flex-direction:column;
+  padding:16px 16px 20px;
+  border-radius:26px;
+  transform-style:preserve-3d;
+  transform:rotateX(var(--tiltX)) rotateY(var(--tiltY));
+  transition:transform 480ms cubic-bezier(.22,1,.36,1), background 1000ms ease, box-shadow 400ms ease;
+  touch-action:none;
+  cursor:grab;
+  will-change:transform;
+  border:8px solid;
+  border-color:#1a1816 #3a3632 #3a3632 #1a1816;
+  background:
+    linear-gradient(155deg, var(--chassis-hi) 0%, var(--chassis-1) 18%, var(--chassis-1) 70%, var(--chassis-2) 100%);
+  box-shadow:
+    /* SOMBRA FRONTAL - efecto de profundidad */
+    0 50px 100px rgba(0,0,0,.8),
+    0 30px 60px rgba(0,0,0,.6),
+    0 15px 30px rgba(0,0,0,.5),
+    /* SOMBRAS LATERALES IZQUIERDA Y DERECHA - cantos visibles */
+    -15px 0 40px rgba(0,0,0,.7),
+    -8px 0 20px rgba(0,0,0,.6),
+    15px 0 40px rgba(0,0,0,.5),
+    8px 0 20px rgba(0,0,0,.4),
+    /* SOMBRA SUPERIOR */
+    0 -10px 25px rgba(0,0,0,.4),
+    /* SOMBRA INFERIOR */
+    0 10px 20px rgba(0,0,0,.3),
+    /* INTERIOR - bisel pronunciado */
+    inset 0 0 30px rgba(0,0,0,.5),
+    inset 0 2px 5px rgba(255,255,255,.1),
+    inset -15px 0 30px rgba(0,0,0,.4),
+    inset 15px 0 30px rgba(0,0,0,.3),
+    inset 0 -15px 30px rgba(0,0,0,.4);
+}
+.device.dragging{transition:background 1000ms ease;cursor:grabbing;}
+
+/* Cantos/Bordes REALES biselados (efecto 3D de grosor pronunciado) */
+.device::before{
+  content:"";position:absolute;inset:0;border-radius:26px;pointer-events:none;z-index:10;
+  /* Bordes con efecto de profundidad extrema */
+  box-shadow:
+    /* Canto izquierdo - oscuro */
+    inset 12px 0 25px rgba(0,0,0,.8),
+    inset 6px 0 15px rgba(0,0,0,.6),
+    /* Canto derecho - menos oscuro */
+    inset -12px 0 25px rgba(0,0,0,.6),
+    inset -6px 0 15px rgba(0,0,0,.4),
+    /* Canto superior - luz */
+    inset 0 3px 8px rgba(255,255,255,.12),
+    /* Canto inferior - oscuro */
+    inset 0 -12px 25px rgba(0,0,0,.5),
+    /* Bisel perimetral */
+    inset 0 0 0 1px rgba(0,0,0,.8);
+}
+
+.device::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(var(--sheen-angle), transparent 28%, rgba(255,255,255,.16) 48%, rgba(255,255,255,.03) 55%, transparent 72%);
+  mix-blend-mode:overlay;
+  z-index:2;
+}
+body[data-theme="rebuilt-active"] .device{
+  background:linear-gradient(155deg,#5C726A 0%, #2E403B 18%, #202E2A 70%, #131C19 100%);
+}
+
+.screw{
+  position:absolute;width:9px;height:9px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #d0cdd9, #6b687a 50%, #2a2820 100%);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,.7),
+    inset 0 0 2px rgba(255,255,255,.4),
+    inset 1px 1px 0 rgba(255,255,255,.3),
+    inset -1px -1px 0 rgba(0,0,0,.5);
+}
+.screw::before{content:"";position:absolute;inset:1px;border-radius:50%;background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.2), transparent);z-index:1;}
+.screw::after{content:"";position:absolute;left:2px;top:4px;width:5px;height:1px;background:#0f0d0a;transform:rotate(20deg);z-index:2;box-shadow:0 0 1px rgba(0,0,0,.8);}
+.screw.tl{top:10px;left:10px;} .screw.tr{top:10px;right:10px;}
+.screw.bl{bottom:10px;left:10px;} .screw.br{bottom:10px;right:10px;}
+
+.chassis-top{
+  flex:0 0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:2px 10px 12px;
+  border-bottom:1px solid rgba(0,0,0,.5);
+  background:linear-gradient(180deg, rgba(255,255,255,.04) 0%, rgba(0,0,0,.1) 100%);
+  margin:0 -16px 0 -16px;
+  padding:8px 26px 14px;
+}
+.led{width:6px;height:6px;border-radius:50%;background:var(--acc-dim);flex-shrink:0;transition:background 400ms ease;}
+.led.on{background:var(--acc);box-shadow:0 0 6px 1px var(--acc-glow);animation:ledPulse 2.4s ease-in-out infinite;}
+@keyframes ledPulse{0%,100%{opacity:1;}50%{opacity:.55;}}
+.brand{
+  font-family:var(--font-mono);font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--metal);text-align:center;flex:1;
+}
+.brand b{color:var(--paper-dim);font-weight:400;}
+.model{font-family:var(--font-mono);font-size:.58rem;color:var(--metal);letter-spacing:.05em;}
+
+/* ---- screen ---- */
+.screen-bezel{
+  position:relative;flex:1 1 auto;min-height:0;
+  border-radius:10px;
+  background:linear-gradient(160deg,#151109,#0a0805);
+  padding:9px;
+  border:2px solid;
+  border-color:#0a0a08 #1a1816 #1a1816 #0a0a08;
+  box-shadow:
+    /* Sombra interior principal (profundidad) */
+    inset 0 12px 20px rgba(0,0,0,.8),
+    inset 0 -8px 15px rgba(0,0,0,.6),
+    /* Bordes laterales hundidos */
+    inset 8px 0 15px rgba(0,0,0,.5),
+    inset -8px 0 15px rgba(0,0,0,.4),
+    /* Borde superior con luz */
+    inset 0 2px 5px rgba(255,255,255,.08),
+    /* Efecto de profundidad */
+    inset 0 0 0 1px rgba(0,0,0,.8);
+}
+.screen-shake{animation:screenShake 90ms steps(2) 6;}
+@keyframes screenShake{
+  0%{transform:translate(0,0);}25%{transform:translate(-3px,2px);}50%{transform:translate(3px,-2px);}75%{transform:translate(-2px,-3px);}100%{transform:translate(2px,3px);}
+}
+.screen-flash{position:absolute;inset:9px;border-radius:5px;background:var(--paper);opacity:0;pointer-events:none;z-index:60;mix-blend-mode:screen;}
+.screen-flash.hit{animation:flashPop 320ms ease-out;}
+@keyframes flashPop{0%{opacity:.8;}100%{opacity:0;}}
+.glitching .card-front{animation:glitchJitter 340ms steps(2);}
+@keyframes glitchJitter{
+  0%,100%{filter:none;transform:translateX(0);}
+  20%{filter:drop-shadow(2px 0 0 rgba(255,20,90,.6)) drop-shadow(-2px 0 0 rgba(0,220,255,.5));transform:translateX(-2px);}
+  40%{filter:drop-shadow(-2px 0 0 rgba(255,20,90,.55));transform:translateX(2px);}
+  60%{filter:drop-shadow(-3px 0 0 rgba(255,20,90,.5)) drop-shadow(3px 0 0 rgba(0,220,255,.45));transform:translateX(-1px);}
+  80%{transform:translateX(1px);}
+}
+
+.screen{
+  position:relative;
+  width:100%;height:100%;
+  border-radius:5px;
+  overflow:hidden;
+  background:var(--screen-bg);
+}
+body[data-theme="rebuilt-active"] .screen{background:var(--screen-bg-r);}
+
+/* ---- glass cover: GlassSurface (SVG feDisplacementMap + backdrop-filter) ---- */
+.glass-cover{
+  position:absolute;inset:0;z-index:70;pointer-events:none;border-radius:5px;overflow:hidden;
+  transform:translateZ(12px);
+  box-shadow:
+    /* Luz frontal del vidrio */
+    inset 0 2px 6px rgba(255,255,255,.15),
+    /* Sombra interior del vidrio */
+    inset 0 0 20px rgba(0,0,0,.4),
+    /* Efecto de profundidad */
+    inset 0 -4px 8px rgba(0,0,0,.3),
+    /* Borde sutil del vidrio */
+    0 0 0 0.5px rgba(255,255,255,.08) inset;
+}
+.glass-layer{
+  position:absolute;inset:0;
+  background:hsl(0 0% 100% / .015);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.07), inset 0 0 30px -8px var(--acc-glow);
+  transition:box-shadow 500ms ease, backdrop-filter 400ms ease;
+  -webkit-mask-image:radial-gradient(ellipse 72% 68% at 50% 50%, transparent 58%, black 100%);
+  mask-image:radial-gradient(ellipse 72% 68% at 50% 50%, transparent 58%, black 100%);
+}
+.glass-layer.fallback{
+  backdrop-filter:blur(.6px) saturate(1.2) brightness(1.03);
+  -webkit-backdrop-filter:blur(.6px) saturate(1.2) brightness(1.03);
+}
+
+/* ---- crate de vinilos: navegación como fundas apiladas ---- */
+.crate-row{
+  position:absolute;top:0;left:0;right:0;z-index:65;
+  display:flex;align-items:flex-end;
+  padding:12px 16px 10px 12px;
+  background:linear-gradient(180deg, rgba(10,10,15,.85) 55%, rgba(10,10,15,0));
+  pointer-events:none;
+}
+.crate-row .sleeve{pointer-events:auto;}
+body[data-theme="rebuilt-active"] .crate-row{background:linear-gradient(180deg, rgba(7,17,15,.85) 55%, rgba(7,17,15,0));}
+.sleeve{
+  position:relative;flex:0 0 auto;
+  width:28px;height:28px;margin-right:-13px;
+  border-radius:3px;
+  background:linear-gradient(155deg,#3a3742,#18161c);
+  box-shadow:0 2px 4px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.05);
+  transform:scale(.76) rotate(-7deg) translateY(4px);
+  opacity:.5;
+  transition:transform 460ms cubic-bezier(.22,1.4,.36,1), opacity 360ms ease, margin-right 460ms cubic-bezier(.22,1.4,.36,1), box-shadow 360ms ease;
+}
+.sleeve:nth-child(even){transform:scale(.76) rotate(7deg) translateY(4px);}
+.sleeve.active{
+  transform:scale(1.18) rotate(0deg) translateY(-6px);
+  opacity:1;
+  margin-right:8px;
+  box-shadow:0 6px 14px rgba(0,0,0,.55), 0 0 0 1px var(--acc);
+}
+.sleeve-inner{
+  position:absolute;inset:5px;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%, var(--acc-dim), #14110c 72%);
+  display:flex;align-items:center;justify-content:center;
+  transition:background 360ms ease;
+}
+.sleeve.active .sleeve-inner{background:radial-gradient(circle at 40% 35%, var(--acc), var(--acc-dim) 78%);}
+.sleeve-n{font-family:var(--font-display);font-size:.48rem;font-weight:900;color:var(--screen-bg);opacity:0;transition:opacity 300ms ease;}
+.sleeve.active .sleeve-n{opacity:1;}
+.sleeve[data-accent="alarm"] .sleeve-inner{background:radial-gradient(circle at 40% 35%, #7A1B0C, #14110c 72%);}
+.sleeve[data-accent="alarm"].active .sleeve-inner{background:radial-gradient(circle at 40% 35%, #FF3D1F, #7A1B0C 78%);}
+.sleeve[data-accent="alarm"].active{box-shadow:0 6px 14px rgba(0,0,0,.55), 0 0 0 1px #FF3D1F;}
+.sleeve[data-accent="void"] .sleeve-inner{background:radial-gradient(circle at 40% 35%, #46505A, #14110c 72%);}
+.sleeve[data-accent="void"].active .sleeve-inner{background:radial-gradient(circle at 40% 35%, #B9C6CE, #46505A 78%);}
+.sleeve[data-accent="void"].active{box-shadow:0 6px 14px rgba(0,0,0,.55), 0 0 0 1px #B9C6CE;}
+.sleeve[data-accent="teal"] .sleeve-inner{background:radial-gradient(circle at 40% 35%, #0D5C52, #14110c 72%);}
+.sleeve[data-accent="teal"].active .sleeve-inner{background:radial-gradient(circle at 40% 35%, #22E6D0, #0D5C52 78%);}
+.sleeve[data-accent="teal"].active{box-shadow:0 6px 14px rgba(0,0,0,.55), 0 0 0 1px #22E6D0;}
+.sleeve.leaving{
+  transition:transform 360ms cubic-bezier(.5,0,1,.4), opacity 320ms ease;
+  transform:scale(.58) rotate(16deg) translateY(16px) translateX(-8px) !important;
+  opacity:0;
+  margin-right:-13px !important;
+}
+.sleeve.entering{animation:sleevePop 460ms cubic-bezier(.22,1.6,.36,1);}
+@keyframes sleevePop{
+  0%{transform:scale(.68) rotate(11deg) translateY(12px);}
+  58%{transform:scale(1.26) rotate(-3deg) translateY(-8px);}
+  100%{transform:scale(1.18) rotate(0deg) translateY(-6px);}
+}
+
+/* ---- CardSwap: stack de tracks (reemplaza el scroll de páginas) ---- */
+.card-stack{
+  position:absolute;inset:0;top:46px;
+  perspective:1000px;
+}
+.track-card{
+  --depth:0;
+  position:absolute;inset:6px 12px 12px;
+  border-radius:8px;
+  background:linear-gradient(160deg, #17141b, var(--screen-bg));
+  padding:22px 16px 16px;
+  overflow:hidden;
+  transform-origin:center center;
+  backface-visibility:hidden;
+  will-change:transform,opacity;
+  pointer-events:none;
+  opacity:calc(1 - var(--depth) * .28);
+  filter:blur(calc(var(--depth) * 1.05px));
+  transition:opacity 420ms ease, filter 420ms ease;
+  box-shadow:0 10px 26px rgba(0,0,0,.4);
+}
+.track-card.card-front{pointer-events:auto;}
+.track-card.hidden-deep{opacity:0 !important;}
+body[data-theme="rebuilt-active"] .track-card{background:linear-gradient(160deg,#14201d,var(--screen-bg-r));}
+
+.track-card.intro{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+}
+.track-card.intro h1{
+  font-family:var(--font-display);font-weight:900;font-size:2.1rem;line-height:.95;margin:0;text-transform:uppercase;letter-spacing:.01em;
+}
+.track-card.intro h1 .l1{display:block;color:var(--paper);transform:rotate(-1.5deg);}
+.track-card.intro h1 .l2{
+  display:block;margin-top:.5rem;color:transparent;-webkit-text-stroke:1.6px var(--acc);
+  transform:rotate(1.2deg);
+}
+.track-card.intro .sub{margin-top:1.1rem;font-family:var(--font-mono);font-size:.66rem;color:var(--paper-dim);}
+.track-card.intro .start-tag{
+  display:inline-block;margin-top:2rem;
+  background:var(--acc);color:var(--screen-bg);
+  font-family:var(--font-mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+  padding:.5rem .9rem;transform:rotate(-1.5deg);
+  animation:tagPulse 2.2s ease-in-out infinite;
+}
+@keyframes tagPulse{0%,100%{opacity:1;}50%{opacity:.7;}}
+
+.t-head{margin-bottom:1rem;position:relative;padding-top:8px;}
+.t-head .stamp{
+  position:absolute;top:-16px;right:0;z-index:0;pointer-events:none;user-select:none;
+  font-family:var(--font-display);font-weight:900;font-size:3.6rem;line-height:.78;
+  color:transparent;-webkit-text-stroke:1.3px var(--acc);opacity:.5;transform:rotate(-5deg);
+}
+.t-head .n{position:relative;z-index:1;font-family:var(--font-mono);font-size:.6rem;letter-spacing:.18em;color:var(--paper-dim);margin-bottom:.35rem;}
+.t-head h2{
+  position:relative;z-index:1;display:inline-block;
+  font-family:var(--font-title);font-weight:400;font-size:clamp(1.2rem,5.8vw,1.5rem);
+  line-height:1.08;margin:0;text-transform:uppercase;letter-spacing:.01em;transform:rotate(-1deg);
+}
+body[data-theme="rebuilt-active"] .t-head h2{color:var(--paper-r);transform:none;}
+
+.wf-wrap{width:100%;height:58px;margin-bottom:.65rem;}
+.wf-wrap canvas{width:100%;height:100%;display:block;}
+
+.mini-transport{display:flex;align-items:center;gap:.6rem;margin-bottom:.9rem;font-family:var(--font-mono);font-size:.62rem;color:var(--paper-dim);}
+.mini-play{width:26px;height:26px;border:1px solid var(--paper-dim);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mini-play svg{width:9px;height:9px;fill:var(--paper);}
+
+.t-copy p{font-family:var(--font-mono);font-size:.82rem;line-height:1.6;color:var(--paper);margin:0 0 .7rem;}
+body[data-theme="rebuilt-active"] .t-copy p{color:var(--paper-r);}
+.t-copy .tag{
+  display:inline-block;background:var(--acc);color:var(--screen-bg);
+  font-family:var(--font-mono);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;
+  padding:.3rem .6rem;margin-top:.4rem;transform:rotate(-1.5deg);
+}
+body[data-theme="rebuilt-active"] .t-copy .tag{background:var(--acc);color:var(--screen-bg-r);transform:none;}
+
+#card-5 .t-head h2{color:var(--paper-dim);opacity:.55;}
+#card-5 .t-head .n{opacity:.5;}
+#card-5 .t-head .stamp{opacity:.12;}
+#card-5 .mini-play{border-style:dashed;opacity:.45;}
+#card-5 .mini-play svg{opacity:.3;}
+#card-5 .mini-transport .time{opacity:.4;}
+#card-5 .t-copy p{color:var(--paper-dim);}
+#card-5.attempting .mini-play{animation:ghostFlicker 900ms ease;}
+@keyframes ghostFlicker{0%{opacity:.45;}20%{opacity:.9;}40%{opacity:.2;}60%{opacity:.7;}100%{opacity:.45;}}
+
+#card-6{text-align:center;}
+#card-6 .wf-wrap,#card-6 .mini-transport{margin-left:auto;margin-right:auto;justify-content:center;}
+#card-6 .t-head{display:inline-block;}
+#card-6 .t-head .n{color:var(--acc);}
+#card-6 .mini-play{border-color:var(--acc);}
+
+.editable-active{outline:1.5px dashed var(--acc);outline-offset:3px;cursor:text;border-radius:2px;}
+
+/* ---- lcd readout ---- */
+.lcd{
+  flex:0 0 auto;margin-top:12px;
+  display:flex;align-items:center;gap:8px;
+  padding:7px 12px;border-radius:6px;
+  background:linear-gradient(160deg,#0e0c08,#050403);
+  box-shadow:
+    /* Sombra interior (profundidad) */
+    0 4px 8px rgba(0,0,0,.6) inset,
+    0 -2px 4px rgba(0,0,0,.4) inset,
+    /* Borde exterior */
+    0 1px 3px rgba(0,0,0,.5),
+    /* Borde superior con luz */
+    inset 0 1px 0 rgba(255,255,255,.05),
+    /* Bisel */
+    inset 0 0 0 1px rgba(0,0,0,.6);
+  font-family:var(--font-mono);
+  border:1px solid rgba(0,0,0,.4);
+}
+.reels{display:flex;gap:3px;flex-shrink:0;}
+.reel{width:13px;height:13px;border-radius:50%;border:1.4px solid var(--acc-dim);position:relative;}
+.reel::before,.reel::after{content:"";position:absolute;background:var(--acc-dim);}
+.reel::before{left:50%;top:1px;bottom:1px;width:1.2px;transform:translateX(-50%);}
+.reel::after{top:50%;left:1px;right:1px;height:1.2px;transform:translateY(-50%);}
+.reel.spin{animation:reelSpin 1.8s linear infinite;border-color:var(--acc);}
+.reel.spin::before,.reel.spin::after{background:var(--acc);}
+@keyframes reelSpin{to{transform:rotate(360deg);}}
+.lcd-text{flex:1;min-width:0;}
+.lcd-track{font-size:.66rem;color:var(--acc);letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lcd-time{font-size:.6rem;color:var(--paper-dim);margin-top:1px;}
+
+/* ---- controls ---- */
+.controls{flex:0 0 auto;display:flex;align-items:center;gap:10px;margin-top:10px;padding:0 4px;}
+.hw-btn{
+  width:44px;height:44px;border-radius:50%;flex-shrink:0;
+  background:radial-gradient(circle at 35% 30%, #6d6979, #3d3a4a 50%, #2a2622 100%);
+  box-shadow:
+    /* Sombra principal */
+    0 4px 8px rgba(0,0,0,.5),
+    /* Borde superior */
+    inset 0 1px 0 rgba(255,255,255,.16),
+    /* Sombra interior lateral */
+    inset 1px 1px 2px rgba(255,255,255,.1),
+    inset -1px -1px 2px rgba(0,0,0,.4);
+  display:flex;align-items:center;justify-content:center;
+  transition:transform 90ms ease, box-shadow 90ms ease;
+  border:1px solid rgba(0,0,0,.3);
+}
+.hw-btn:active{
+  transform:translateY(2px);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,.4),
+    inset 0 1px 0 rgba(255,255,255,.12),
+    inset 0 2px 4px rgba(0,0,0,.3);
+}
+.hw-btn svg{width:14px;height:14px;fill:var(--paper);}
+.hw-btn.play{
+  width:56px;height:56px;
+  background:radial-gradient(circle at 35% 30%, #7a7684, #4a4754 50%, #302c38 100%);
+  box-shadow:
+    0 6px 12px rgba(0,0,0,.6),
+    inset 0 1px 0 rgba(255,255,255,.18),
+    inset 1px 1px 3px rgba(255,255,255,.12),
+    inset -1px -1px 3px rgba(0,0,0,.5);
+}
+.hw-btn.play:active{
+  box-shadow:
+    0 3px 6px rgba(0,0,0,.5),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 3px 6px rgba(0,0,0,.4);
+}
+.hw-btn.play svg{width:17px;height:17px;}
+.wheel{
+  margin-left:auto;width:44px;height:44px;border-radius:50%;flex-shrink:0;
+  background:conic-gradient(from -40deg,#32303b,#8a7d9a,#32303b 60%,#8a7d9a 90%,#32303b);
+  box-shadow:
+    0 4px 8px rgba(0,0,0,.6),
+    inset 0 0 0 2px #1a1712,
+    inset 0 1px 0 rgba(255,255,255,.1),
+    inset 0 -1px 2px rgba(0,0,0,.4);
+  position:relative;
+  border:1px solid rgba(0,0,0,.3);
+}
+.wheel::before{content:"";position:absolute;inset:6px;border-radius:50%;background:radial-gradient(circle at 35% 35%, rgba(255,255,255,.1), transparent);z-index:1;}
+.wheel::after{
+  content:"";position:absolute;inset:15px;border-radius:50%;background:radial-gradient(circle at 40% 40%, #2a2520, #0f0d0a);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,.8),
+    inset 0 -1px 1px rgba(255,255,255,.05);
+}
+
+.chassis-bottom{
+  flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:8px;
+  margin:12px -16px -20px -16px;
+  padding:12px 16px 8px;
+  border-top:1px solid rgba(0,0,0,.5);
+  background:linear-gradient(180deg, rgba(0,0,0,.1) 0%, rgba(255,255,255,.02) 100%);
+}
+.jack{width:8px;height:8px;border-radius:50%;background:#0c0a07;box-shadow:inset 0 1px 2px rgba(0,0,0,.8), 0 1px 0 rgba(255,255,255,.05);}
+.cable{width:120px;height:2px;border-radius:2px;background:linear-gradient(90deg,#0c0a07,#2b2720,#0c0a07);}
+
+.credits-plate{
+  position:absolute;left:0;right:0;bottom:4px;text-align:center;z-index:1;
+  font-family:var(--font-mono);font-size:.34rem;letter-spacing:.03em;
+  color:var(--metal);opacity:.38;pointer-events:none;user-select:none;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 34px;
+}
+
+/* ---- EarPods REALES - Composición mejorada ---- */
+.device-earbuds{
+  position:absolute;right:-5%;top:-45%;width:200px;height:380px;
+  transform:translate3d(0,0,70px);
+  pointer-events:none;z-index:20;
+}
+
+.eb-cable-wrapper{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:240px;height:220px;
+}
+
+.eb-cable-svg{
+  width:100%;height:100%;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.8));
+}
+
+/* ---- EarPod (contenedor individual) ---- */
+.earpod{
+  position:absolute;
+  width:35px;
+  height:75px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  animation:earpodSwing 3.5s ease-in-out infinite;
+}
+
+.earpod-left{
+  left:25%;
+  top:160px;
+  animation-delay:-0.3s;
+  transform:rotateZ(-10deg);
+}
+
+.earpod-right{
+  right:12%;
+  top:180px;
+  animation-delay:0s;
+  transform:rotateZ(10deg);
+}
+
+/* Vástago (stem) - parte cilíndrica que cuelga */
+.earpod-stem{
+  width:11px;
+  height:48px;
+  background:linear-gradient(90deg, #FFFFFF 0%, #F8F8F8 50%, #FFFFFF 100%);
+  border-radius:6px;
+  box-shadow:
+    0 6px 12px rgba(0,0,0,.6),
+    inset 1.5px 1.5px 3px rgba(255,255,255,.75),
+    inset -1.5px -1.5px 3px rgba(0,0,0,.25);
+  order:1;
+}
+
+/* Bulbo (la esfera/bulto en la parte inferior) */
+.earpod-bulb{
+  width:30px;
+  height:32px;
+  background:radial-gradient(ellipse 45% 50% at 35% 35%, #FFFFFF, #F2F2F2 40%, #D8D8D8 100%);
+  border-radius:50% 50% 48% 50%;
+  box-shadow:
+    0 8px 16px rgba(0,0,0,.7),
+    inset 3px 3px 7px rgba(255,255,255,.8),
+    inset -3px -3px 6px rgba(0,0,0,.3);
+  order:2;
+  margin-top:-3px;
+}
+
+/* Detalle: punto de micrófono en la parte inferior del bulbo */
+.earpod-detail{
+  position:absolute;
+  width:3px;
+  height:3px;
+  background:#0a0a0a;
+  border-radius:50%;
+  bottom:10px;
+  left:50%;
+  transform:translateX(-50%);
+  box-shadow:0 1px 2px rgba(0,0,0,.9);
+}
+
+@keyframes earpodSwing{
+  0%, 100%{
+    transform:rotateZ(-8deg) translateY(0);
+    opacity:0.98;
+  }
+  50%{
+    transform:rotateZ(-7deg) translateY(-4px);
+    opacity:1;
+  }
+}
+
+.earpod-right{
+  animation:earpodSwingRight 3.7s ease-in-out infinite;
+}
+
+@keyframes earpodSwingRight{
+  0%, 100%{
+    transform:rotateZ(8deg) translateY(0);
+    opacity:0.98;
+  }
+  50%{
+    transform:rotateZ(7deg) translateY(-4px);
+    opacity:1;
+  }
+}
+
+@media(max-width:760px){ .device-earbuds{display:none;} }
+
+/* ---- toolbar de edición ---- */
+.edit-toolbar{
+  position:fixed;right:18px;bottom:18px;z-index:400;
+  display:flex;gap:8px;
+}
+.edit-toolbar button{
+  font-family:var(--font-mono);font-size:.62rem;letter-spacing:.04em;text-transform:uppercase;
+  padding:.55rem .8rem;border-radius:20px;
+  background:rgba(20,18,24,.72);color:var(--paper);
+  border:1px solid rgba(255,255,255,.14);
+  backdrop-filter:blur(6px);
+  box-shadow:0 4px 14px rgba(0,0,0,.4);
+}
+.edit-toolbar button:hover{border-color:var(--acc);}
+.edit-toolbar #btn-edit-toggle.on{background:var(--acc);color:var(--screen-bg);}
+
+@media(max-height:700px){
+  .track-card.intro h1{font-size:1.5rem;}
+  .t-copy p{font-size:.8rem;}
+}
+@media(prefers-reduced-motion:reduce){
+  .grain,.track-card.intro .start-tag,.led.on,.reel.spin{animation:none;}
+  .screen-shake,.glitching .card-front{animation:none;}
+  .device{transition:background 1000ms ease;}
+}
+</style>
+</head>
+<body>
+<canvas id="shapeblur-canvas" aria-hidden="true"></canvas>
+<div class="room" aria-hidden="true">
+  <div class="room-floor"></div>
+  <div class="prop-parallax pw-vinyl" data-depth="0.55"><div class="prop prop-vinyl"></div></div>
+  <div class="prop-parallax pw-guitar" data-depth="0.9"><div class="prop prop-guitar"></div></div>
+  <div class="prop-parallax pw-turntable" data-depth="0.65"><div class="prop prop-turntable"></div></div>
+  <div class="prop-parallax pw-headphones" data-depth="0.8"><div class="prop prop-headphones"></div></div>
+</div>
+<div class="bg-vignette" aria-hidden="true"></div>
+<div class="grain"></div>
+
+<!-- Background images with parallax effect -->
+<div id="background-images" aria-hidden="true">
+  <div class="bg-image bg-guitar" style="background-image:var(--img-bg-guitar);" data-parallax="true" data-x="-2" data-y="-1.5"></div>
+  <div class="bg-image bg-turntable" style="background-image:var(--img-bg-turntable);" data-parallax="true" data-x="0" data-y="-0.5"></div>
+  <div class="bg-image bg-mic" style="background-image:var(--img-bg-mic);" data-parallax="true" data-x="1.5" data-y="-1"></div>
+  <div class="bg-image bg-keyboard" style="background-image:var(--img-bg-keyboard);" data-parallax="true" data-x="-1" data-y="1"></div>
+  <div class="bg-image bg-vinyl" style="background-image:var(--img-bg-vinyl);" data-parallax="true" data-x="2" data-y="0.8"></div>
+  <div class="bg-image bg-cables" style="background-image:var(--img-bg-cables);" data-parallax="true" data-x="1.2" data-y="-0.3"></div>
+  <div class="bg-image bg-lights"></div>
+</div>
+
+<div class="device-stage" id="device-stage">
+<div class="device" id="device">
+  <div class="device-earbuds" aria-hidden="true">
+    <!-- Cable que cuelga desde el top center -->
+    <div class="eb-cable-wrapper">
+      <svg class="eb-cable-svg" viewBox="0 0 200 300" preserveAspectRatio="none">
+        <!-- Línea izquierda del cable -->
+        <path d="M60,10 Q50,60 45,140" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round" filter="drop-shadow(0 1px 2px rgba(0,0,0,0.7))"/>
+        <!-- Línea derecha del cable -->
+        <path d="M140,10 Q150,60 155,140" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round" filter="drop-shadow(0 1px 2px rgba(0,0,0,0.7))"/>
+      </svg>
+    </div>
+
+    <!-- Audífono izquierdo (EarPod) -->
+    <div class="earpod earpod-left">
+      <!-- Vástago -->
+      <div class="earpod-stem"></div>
+      <!-- Bulbo principal -->
+      <div class="earpod-bulb"></div>
+      <!-- Detalle: punto negro (micrófono) -->
+      <div class="earpod-detail"></div>
+    </div>
+
+    <!-- Audífono derecho (EarPod) -->
+    <div class="earpod earpod-right">
+      <!-- Vástago -->
+      <div class="earpod-stem"></div>
+      <!-- Bulbo principal -->
+      <div class="earpod-bulb"></div>
+      <!-- Detalle: punto negro (micrófono) -->
+      <div class="earpod-detail"></div>
+    </div>
+  </div>
+  <span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>
+
+  <div class="chassis-top">
+    <span class="led on" id="power-led"></span>
+    <span class="brand"><b>discografía incompleta</b></span>
+    <span class="model">DI·06</span>
+  </div>
+
+  <div class="screen-bezel" id="screen-bezel">
+    <div class="screen-flash" id="screen-flash"></div>
+    <div class="screen" id="screen">
+
+      <div class="crate-row" id="crate-row">
+        <button class="sleeve" data-goto="0" aria-label="Inicio"><span class="sleeve-inner"><span class="sleeve-n">·</span></span></button>
+        <button class="sleeve active" data-goto="1" aria-label="Track 1"><span class="sleeve-inner"><span class="sleeve-n">01</span></span></button>
+        <button class="sleeve" data-goto="2" aria-label="Track 2"><span class="sleeve-inner"><span class="sleeve-n">02</span></span></button>
+        <button class="sleeve" data-goto="3" aria-label="Track 3"><span class="sleeve-inner"><span class="sleeve-n">03</span></span></button>
+        <button class="sleeve" data-goto="4" data-accent="alarm" aria-label="Track 4"><span class="sleeve-inner"><span class="sleeve-n">04</span></span></button>
+        <button class="sleeve" data-goto="5" data-accent="void" aria-label="Track 5"><span class="sleeve-inner"><span class="sleeve-n">05</span></span></button>
+        <button class="sleeve" data-goto="6" data-accent="teal" aria-label="Track 6"><span class="sleeve-inner"><span class="sleeve-n">06</span></span></button>
+      </div>
+
+      <div class="card-stack" id="card-stack">
+
+        <div class="track-card intro card-front" id="card-0">
+          <h1><span class="l1">Discografía</span><span class="l2">incompleta</span></h1>
+          <button class="start-tag" id="btn-start" type="button">▶ play para empezar</button>
+        </div>
+
+        <div class="track-card" id="card-1" data-mode="complete" data-duration="178">
+          <div class="t-head"><span class="stamp">01</span><div class="n">01 / 06 — 02:58</div><h2>Latido</h2></div>
+          <div class="wf-wrap"><canvas></canvas></div>
+          <div class="mini-transport">
+            <button class="mini-play" data-play="1" aria-label="Reproducir"><svg viewBox="0 0 16 16"><path d="M3 1l12 7-12 7z"/></svg></button>
+            <span class="time"><span class="cur">00:00</span> / 02:58</span>
+          </div>
+          <div class="t-copy">
+            <p>Entendí la diferencia entre una meta y mi propósito de vida. Una es algo que alcanzo, la otra es lo que me sostiene siempre. Mi esencia es estar vivo en la música, presente en ella todos los días.</p>
+            <span class="tag">esencia — no meta</span>
+          </div>
+        </div>
+
+        <div class="track-card" id="card-2" data-mode="cut" data-duration="221" data-freeze="0.42">
+          <div class="t-head"><span class="stamp">02</span><div class="n">02 / 06 — 03:41</div><h2>Todas las formas</h2></div>
+          <div class="wf-wrap"><canvas></canvas></div>
+          <div class="mini-transport">
+            <button class="mini-play" data-play="2" aria-label="Reproducir"><svg viewBox="0 0 16 16"><path d="M3 1l12 7-12 7z"/></svg></button>
+            <span class="time"><span class="cur">00:00</span> / 03:41</span>
+          </div>
+          <div class="t-copy">
+            <p>Tocar, producir, escuchar, escribir para otros, hablar con artistas, lo audiovisual, la moda. Cualquier cosa que sea música me hace vibrar. Eso es lo que me sostiene.</p>
+            <span class="tag">todas las formas — una esencia</span>
+          </div>
+        </div>
+
+        <div class="track-card" id="card-3" data-mode="cut" data-duration="252" data-freeze="0.61">
+          <div class="t-head"><span class="stamp">03</span><div class="n">03 / 06 — 04:12</div><h2>Nunca salí</h2></div>
+          <div class="wf-wrap"><canvas></canvas></div>
+          <div class="mini-transport">
+            <button class="mini-play" data-play="3" aria-label="Reproducir"><svg viewBox="0 0 16 16"><path d="M3 1l12 7-12 7z"/></svg></button>
+            <span class="time"><span class="cur">00:00</span> / 04:12</span>
+          </div>
+          <div class="t-copy">
+            <p>Pasé años esperando el momento perfecto. Pero mientras esperaba, descubrí que ya estaba adentro. Escuchando, viendo cómo otros crean, escribiendo para ellos. Ya estaba viviendo mi propósito.</p>
+            <span class="tag">ya estaba dentro — nunca salí</span>
+          </div>
+        </div>
+
+        <div class="track-card" id="card-4" data-mode="cut" data-duration="107" data-freeze="0.35">
+          <div class="t-head"><span class="stamp">04</span><div class="n">04 / 06 — 01:47</div><h2>Respirar</h2></div>
+          <div class="wf-wrap"><canvas></canvas></div>
+          <div class="mini-transport">
+            <button class="mini-play" data-play="4" aria-label="Reproducir"><svg viewBox="0 0 16 16"><path d="M3 1l12 7-12 7z"/></svg></button>
+            <span class="time"><span class="cur">00:00</span> / 01:47</span>
+          </div>
+          <div class="t-copy">
+            <p>He fracasado en otros proyectos que quise monetizar. No puedo ponerle a la música la presión de que si no creo no como. Mi supervivencia no depende de que mi sonido funcione. Necesito quitarle ese peso.</p>
+            <span class="tag">sin presión — sin urgencia</span>
+          </div>
+        </div>
+
+        <div class="track-card" id="card-5" data-mode="ghost">
+          <div class="t-head"><span class="stamp">05</span><div class="n">05 / 06 — --:--</div><h2>Sin prisa</h2></div>
+          <div class="wf-wrap"><canvas></canvas></div>
+          <div class="mini-transport">
+            <button class="mini-play" data-play="5" aria-label="Reproducir"><svg viewBox="0 0 16 16"><path d="M3 1l12 7-12 7z"/></svg></button>
+            <span class="time"><span class="cur">--:--</span> / --:--</span>
+          </div>
+          <div class="t-copy">
+            <p>Puedo crear sin urgencia, sin miedo. Mi canción puede tardar años, no funcionar, cambiar. Pero mientras tanto sigo tocando, escuchando, escribiendo. Mi propósito se cumple de todas formas.</p>
+            <span class="tag">sin prisa — siempre creando</span>
+          </div>
+        </div>
+
+        <div class="track-card" id="card-6" data-mode="rebuilt" data-duration="204">
+          <div class="t-head"><span class="stamp">06</span><div class="n">06 / 06 — 03:24</div><h2>Lo mío</h2></div>
+          <div class="wf-wrap"><canvas></canvas></div>
+          <div class="mini-transport">
+            <button class="mini-play" data-play="6" aria-label="Reproducir"><svg viewBox="0 0 16 16"><path d="M3 1l12 7-12 7z"/></svg></button>
+            <span class="time"><span class="cur">00:00</span> / 03:24</span>
+          </div>
+          <div class="t-copy">
+            <p>Quiero mi negocio propio, ser mi propio jefe. Porque cuando decides dónde va el tiempo, yo quiero que la música tenga su lugar. Que nada me la quite. Que sea mía, siempre.</p>
+            <span class="tag">mío — para siempre</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="glass-cover" id="glass-cover"></div>
+  </div>
+
+  <div class="lcd">
+    <div class="reels"><span class="reel" id="reel1"></span><span class="reel" id="reel2"></span></div>
+    <div class="lcd-text">
+      <div class="lcd-track" id="lcd-track">01 — DEMO, 2023</div>
+      <div class="lcd-time" id="lcd-time">00:00 / 02:58</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="hw-btn" id="btn-prev" aria-label="Anterior"><svg viewBox="0 0 16 16"><path d="M13 2L4 8l9 6zM3 2h2v12H3z"/></svg></button>
+    <button class="hw-btn play" id="btn-play" aria-label="Reproducir"><svg viewBox="0 0 16 16"><path d="M3 1l12 7-12 7z"/></svg></button>
+    <button class="hw-btn" id="btn-next" aria-label="Siguiente"><svg viewBox="0 0 16 16"><path d="M3 2l9 6-9 6zM11 2h2v12h-2z"/></svg></button>
+    <span class="wheel" aria-hidden="true"></span>
+  </div>
+
+  <div class="chassis-bottom"><span class="jack"></span><span class="cable"></span></div>
+  <div class="credits-plate" aria-hidden="true">ph. wikimedia commons — cc by-sa / cc0 · les paul (met), technics, dt990, vinyl</div>
+</div>
+</div>
+
+<div class="edit-toolbar">
+  <button id="btn-edit-toggle" type="button">✎ editar texto</button>
+  <button id="btn-export" type="button" style="display:none">⬇ descargar html</button>
+</div>
+
+<script>
+/*__THREEJS__*/
+</script>
+<script>
+/*__SCRIPT__*/
+
+// Parallax effect for background images
+(function(){
+  const bgImages = document.querySelectorAll('.bg-image[data-parallax]');
+  let mouseX = 0, mouseY = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+    mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+
+    bgImages.forEach(img => {
+      const dataX = parseFloat(img.dataset.x) || 0;
+      const dataY = parseFloat(img.dataset.y) || 0;
+
+      const offsetX = mouseX * dataX;
+      const offsetY = mouseY * dataY;
+
+      img.style.transform = `translate(${offsetX * 8}px, ${offsetY * 8}px)`;
+    });
+  });
+})();
+</script>
+</body>
+</html>

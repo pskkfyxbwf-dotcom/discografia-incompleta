@@ -1,0 +1,138 @@
+<title>Discografía incompleta — 3 direcciones</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Big+Shoulders+Stencil:wght@700;900&family=Space+Mono:wght@400;700&family=Anton&family=Special+Elite&family=Michroma&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;}
+body{margin:0;background:#050505;color:#eee;font-family:'Space Mono',monospace;}
+.wrap{display:flex;flex-direction:column;gap:2px;}
+.panel{position:relative;padding:3rem clamp(1.2rem,4vw,3.5rem);overflow:hidden;}
+.label{
+  font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;
+  opacity:.6;margin-bottom:1.6rem;
+}
+.grain{position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ===== 1. CINTA RAYADA ===== */
+#p1{background:#16130F;color:#EDE6D8;}
+#p1 .grain{opacity:.09;}
+#p1 .row{display:flex;align-items:flex-end;gap:2rem;flex-wrap:wrap;}
+#p1 .num{
+  font-family:'Big Shoulders Stencil',sans-serif;font-weight:900;font-size:clamp(4rem,14vw,8rem);
+  line-height:.8;color:transparent;-webkit-text-stroke:2px #E3491C;transform:rotate(-4deg);
+}
+#p1 .ttl{
+  font-family:'DotGothic16',monospace;font-size:clamp(1.8rem,5vw,3rem);letter-spacing:.03em;
+  color:#EDE6D8;transform:rotate(-1deg);margin:0 0 .4rem;
+}
+#p1 .tag{display:inline-block;background:#E3491C;color:#16130F;font-family:'Space Mono',monospace;
+  font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .7rem;transform:rotate(-2deg);margin-top:1rem;}
+#p1 .body{font-family:'Space Mono',monospace;font-size:.92rem;line-height:1.6;max-width:46ch;color:#B9AF95;margin-top:1.4rem;}
+#p1 .swatches{display:flex;gap:.5rem;margin-top:2rem;}
+#p1 .sw{width:36px;height:36px;border:1px solid rgba(237,230,216,.25);}
+
+/* ===== 2. ZINE PUNK ===== */
+#p2{background:#0A0A0A;color:#EDEAE0;}
+#p2 .stack{position:relative;min-height:340px;}
+#p2 .scrap{
+  position:absolute;background:#EDEAE0;color:#0A0A0A;padding:1.1rem 1.4rem;
+  clip-path:polygon(0% 2%,3% 0%,97% 1%,100% 4%,99% 97%,96% 100%,2% 99%,0% 96%);
+  box-shadow:0 12px 30px rgba(0,0,0,.5);
+}
+#p2 .scrap.a{top:0;left:0;transform:rotate(-3deg);z-index:2;}
+#p2 .scrap.b{top:40px;left:38%;transform:rotate(2.5deg);background:#F42B77;color:#0A0A0A;z-index:3;}
+#p2 .scrap.c{top:190px;left:8%;transform:rotate(-1.5deg);background:#1B7A8C;color:#EDEAE0;z-index:1;width:70%;}
+#p2 .ttl{font-family:'Anton',sans-serif;font-size:clamp(1.6rem,4.6vw,2.6rem);text-transform:uppercase;line-height:.95;margin:0;}
+#p2 .body{font-family:'Special Elite',monospace;font-size:.88rem;line-height:1.55;margin-top:.6rem;}
+#p2 .halftone{position:absolute;inset:0;opacity:.5;pointer-events:none;
+  background-image:radial-gradient(circle,#0A0A0A 1px,transparent 1.2px);background-size:6px 6px;
+  mix-blend-mode:multiply;}
+#p2 .swatches{display:flex;gap:.5rem;margin-top:2.4rem;position:relative;z-index:4;}
+#p2 .sw{width:36px;height:36px;border:1px solid rgba(237,234,224,.25);}
+
+/* ===== 3. METAL FRÍO ===== */
+#p3{background:#0D1012;color:#D7DBDC;}
+#p3 .rack{
+  background:linear-gradient(155deg,#8A9296,#565D60 12%,#3C4247 60%,#2A2E31);
+  border-radius:4px;padding:1.6rem 1.8rem;position:relative;
+  box-shadow:0 20px 50px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.15);
+}
+#p3 .rack::before{content:"";position:absolute;inset:0;border-radius:4px;
+  background:repeating-linear-gradient(100deg,rgba(255,255,255,.05) 0 2px,transparent 2px 5px);}
+#p3 .leds{display:flex;gap:.5rem;margin-bottom:1.2rem;position:relative;}
+#p3 .led{width:8px;height:8px;border-radius:50%;background:#C6FF3D;box-shadow:0 0 6px 1px #C6FF3D;}
+#p3 .led.amber{background:#FF9A2E;box-shadow:0 0 6px 1px #FF9A2E;}
+#p3 .screen{background:#0D1012;border-radius:2px;padding:1.4rem 1.6rem;position:relative;
+  box-shadow:inset 0 2px 8px rgba(0,0,0,.7);}
+#p3 .ttl{font-family:'Michroma',sans-serif;font-size:clamp(1.1rem,3vw,1.7rem);letter-spacing:.02em;
+  color:#C6FF3D;margin:0 0 .5rem;text-transform:uppercase;}
+#p3 .body{font-family:'IBM Plex Mono',monospace;font-size:.86rem;line-height:1.6;color:#9FA8AB;max-width:48ch;}
+#p3 .data{font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.08em;color:#6E7679;margin-top:1rem;}
+#p3 .swatches{display:flex;gap:.5rem;margin-top:2rem;}
+#p3 .sw{width:36px;height:36px;border:1px solid rgba(215,219,220,.25);}
+</style>
+
+<div class="wrap">
+
+  <section id="p1" class="panel">
+    <div class="grain"></div>
+    <div class="label">Dirección 1 — Cinta rayada</div>
+    <div class="row">
+      <div class="num">04</div>
+      <div>
+        <p class="ttl">Apertura Digital</p>
+        <span class="tag">interrupción — no elegida</span>
+      </div>
+    </div>
+    <p class="body">Aposté todo a esto, como si tuviera que salvarme. No funcionó, y mientras pasaba dejé de hacer música por completo.</p>
+    <div class="swatches">
+      <div class="sw" style="background:#16130F"></div>
+      <div class="sw" style="background:#E3491C"></div>
+      <div class="sw" style="background:#EDE6D8"></div>
+      <div class="sw" style="background:#3A2E22"></div>
+    </div>
+  </section>
+
+  <section id="p2" class="panel">
+    <div class="halftone"></div>
+    <div class="label">Dirección 2 — Xerox de zine punk</div>
+    <div class="stack">
+      <div class="scrap a" style="width:56%;">
+        <p class="ttl">Apertura<br>Digital</p>
+      </div>
+      <div class="scrap b" style="width:44%;">
+        <span style="font-family:'Special Elite';font-size:.78rem;">interrupción — no elegida</span>
+      </div>
+      <div class="scrap c">
+        <p class="body">Aposté todo a esto, como si tuviera que salvarme. No funcionó, y mientras pasaba dejé de hacer música por completo.</p>
+      </div>
+    </div>
+    <div class="swatches">
+      <div class="sw" style="background:#0A0A0A"></div>
+      <div class="sw" style="background:#F42B77"></div>
+      <div class="sw" style="background:#1B7A8C"></div>
+      <div class="sw" style="background:#EDEAE0"></div>
+    </div>
+  </section>
+
+  <section id="p3" class="panel">
+    <div class="grain" style="opacity:.05;"></div>
+    <div class="label">Dirección 3 — Metal frío / rack de estudio</div>
+    <div class="rack">
+      <div class="leds"><span class="led"></span><span class="led amber"></span><span class="led"></span></div>
+      <div class="screen">
+        <p class="ttl">04 · Apertura Digital</p>
+        <p class="body">Aposté todo a esto, como si tuviera que salvarme. No funcionó, y mientras pasaba dejé de hacer música por completo.</p>
+        <p class="data">CH.04 &nbsp;·&nbsp; INTERRUPCIÓN — NO ELEGIDA &nbsp;·&nbsp; 01:47</p>
+      </div>
+    </div>
+    <div class="swatches">
+      <div class="sw" style="background:#0D1012"></div>
+      <div class="sw" style="background:#8A9296"></div>
+      <div class="sw" style="background:#C6FF3D"></div>
+      <div class="sw" style="background:#FF9A2E"></div>
+    </div>
+  </section>
+
+</div>
